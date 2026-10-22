@@ -1,0 +1,10 @@
+services:
+  rackpulse:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/homelab-admin/rackpulse-ipam:latest
+    container_name: rackpulse-ipam
+    restart: unless-stopped
+    ports:
+      - "8080:80"
