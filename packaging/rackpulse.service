@@ -5,9 +5,9 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/usr/share/rackpulse
-Environment="RACKPULSE_PORT=8080"
-Environment="RACKPULSE_BIND=0.0.0.0"
-ExecStart=/usr/bin/python3 /usr/share/rackpulse/server.py --port 8080
+Environment="PORT=8080"
+Environment="DATA_DIR=/var/lib/rackpulse"
+ExecStart=/usr/bin/python3 /usr/share/rackpulse/server.py
 Restart=on-failure
 RestartSec=5
 

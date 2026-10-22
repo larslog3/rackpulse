@@ -1,0 +1,31 @@
+name: "rackpulse"
+arch: "all"
+platform: "linux"
+version: "1.0.0"
+section: "net"
+priority: "optional"
+maintainer: "larslog3 <larslog3@users.noreply.github.com>"
+description: |
+  RackPulse Homelab IPAM & Ansible Inventory Studio.
+  Self-hosted web utility to track homelab IPs, VLANs, distros, and apps,
+  and dynamically generate Ansible INI, YAML, and JSON inventories.
+homepage: "https://github.com/larslog3/rackpulse"
+license: "MIT"
+
+depends:
+  - python3
+
+contents:
+  - src: ./index.html
+    dst: /usr/share/rackpulse/index.html
+  - src: ./server.py
+    dst: /usr/share/rackpulse/server.py
+    file_info:
+      mode: 0755
+  - src: ./packaging/rackpulse.service
+    dst: /lib/systemd/system/rackpulse.service
+  - dst: /var/lib/rackpulse
+    type: dir
+
+scripts:
+  postinstall: ./packaging/postinstall.sh

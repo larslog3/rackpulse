@@ -1,14 +1,20 @@
-FROM nginx:1.27-alpine
+FROM python:3.12-alpine
 
-LABEL org.opencontainers.image.title="RackPulse — Homelab IPAM & Ansible Studio"
-LABEL org.opencontainers.image.description="Track homelab IPs, hostnames, VLANs, distros & services and export Ansible inventories"
+LABEL org.opencontainers.image.title="RackPulse Homelab IPAM & Ansible Studio"
+LABEL org.opencontainers.image.description="Self-hosted homelab IPAM and dynamic Ansible inventory generator"
 LABEL org.opencontainers.image.licenses="MIT"
 
-COPY index.html /usr/share/nginx/html/index.html
+WORKDIR /app
+COPY index.html /app/index.html
+COPY server.py /app/server.py
 
-RUN printf 'server {\n    listen 80;\n    server_name _;\n    root /usr/share/nginx/html;\n    index index.html;\n    gzip on;\n    gzip_types text/plain text/css application/json application/javascript;\n    location / {\n        try_files $uri $uri/ /index.html;\n    }\n}\n' > /etc/nginx/conf.d/default.conf
+VOLUME ["/data"]
+ENV PORT=8080
+ENV DATA_DIR=/data
 
-EXPOSE 80
+EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:80/ > /dev/null || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
+  CMD wget -qO- http://127.0.0.1:${PORT}/api/health || exit 1
+
+CMD ["python3", "/app/server.py"]
