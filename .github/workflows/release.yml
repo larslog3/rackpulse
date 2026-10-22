@@ -2,10 +2,8 @@ name: Build Container & Linux Packages (.deb / .rpm / .apk / Arch)
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - "v*.*.*"
+    branches: [ "main" ]
+    tags: [ "v*.*.*" ]
   workflow_dispatch:
 
 permissions:
@@ -32,7 +30,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker container image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -40,25 +38,19 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Install GoReleaser nFPM
-        uses: goreleaser/nfpm-action@v2
-
-      - name: Package for Debian/Ubuntu (.deb), RHEL/Fedora (.rpm), Alpine (.apk), and Arch
+      - name: Install nFPM and build Linux packages (.deb, .rpm, .apk, Arch)
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
+          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
+          sudo apt-get update
+          sudo apt-get install -y nfpm
           mkdir -p dist
           nfpm package --config .nfpm.yaml --packager deb --target dist/
           nfpm package --config .nfpm.yaml --packager rpm --target dist/
           nfpm package --config .nfpm.yaml --packager apk --target dist/
           nfpm package --config .nfpm.yaml --packager archlinux --target dist/
-          ls -lh dist/
 
-      - name: Upload Linux packages as workflow artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-distro-packages
-          path: dist/*
-
-      - name: Publish GitHub Release with attached Linux packages
+      - name: Publish GitHub Release with Linux Packages
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
